@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->integer('department_id');
-            $table->string('name',55);
-            $table->string('email',55);
-            $table->string('phone',15);
-            $table->string('address',250);
-           
-
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('phone');
+            $table->text('address');
+            $table->foreignId('department_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
