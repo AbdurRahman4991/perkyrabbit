@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pivots', function (Blueprint $table) {
+        Schema::create('achievement_employee', function (Blueprint $table) {
             $table->id();
             $table->integer('achievement_id');
             $table->integer('employee_id');             

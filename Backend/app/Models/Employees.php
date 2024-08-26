@@ -15,4 +15,14 @@ class Employees extends Model
         'phone',
         'address',
     ];
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsToMany(Departments::class);
+    }
+
+    // public function department(): BelongsTo
+    // {
+    //     return $this->belongsTo(Departments::class);
+    // }
 }
