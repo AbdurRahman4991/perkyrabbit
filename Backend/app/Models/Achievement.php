@@ -12,4 +12,5 @@ class Achievement extends Model
     {
         return $this->belongsToMany(Employee::class)->withPivot('achievement_date')->withTimestamps();
     }
+    
 }

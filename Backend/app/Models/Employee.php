@@ -16,8 +16,12 @@ class Employee extends Model
         return $this->belongsTo(Department::class);
     }
 
+    // public function achievements()
+    // {
+    //     return $this->belongsToMany(Achievement::class)->withPivot('achievement_date')->withTimestamps();
+    // }
     public function achievements()
-    {
-        return $this->belongsToMany(Achievement::class)->withPivot('achievement_date')->withTimestamps();
-    }
+{
+    return $this->belongsToMany(Achievement::class)->withPivot('achievement_date');
+}
 }
