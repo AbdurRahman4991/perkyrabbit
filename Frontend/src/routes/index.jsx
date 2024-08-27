@@ -3,7 +3,7 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import EmplyeePage from "../pages/EmplyeePage";
 
-createBrowserRouter([{
+const router = createBrowserRouter([{
     children:[
         {
             path:'/',
@@ -19,3 +19,5 @@ createBrowserRouter([{
         }
     ]
 }])
+
+export default router;
