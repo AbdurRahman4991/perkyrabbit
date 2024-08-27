@@ -7,6 +7,15 @@ export const emplyeSlice = api.injectEndpoints({
       providesTags : ["employees"]
     }),
    
+    getDepartment: builder.query({
+      query: (token) => `employees`,
+      providesTags : ["employees"]
+    }),
+
+    getAcivment: builder.query({
+      query: (token) => `employees`,
+      providesTags : ["employees"]
+    }),
 
     // getSingleBlog: builder.query({
     //   query: (id) => `single/blog/${id}`,
@@ -14,19 +23,18 @@ export const emplyeSlice = api.injectEndpoints({
     // }),
 
     
-
-    // createContact: builder.mutation({
-    //   query: data => ({
-    //     url: 'contact',
-    //     method: 'POST',
-    //     body: data
-    //   }),
-    //   invalidatesTags: ['about']
-    // })
+    createEmplyee: builder.mutation({
+      query: data => ({
+        url: 'employees',
+        method: 'POST',
+        body: data
+      }),
+      invalidatesTags: ['employees']
+    })
   }),
 })
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetEmplyeeQuery, 
+export const { useGetEmplyeeQuery, useCreateEmplyeeMutation , useGetAcivmentQuery, useGetDepartmentQuery
 } = emplyeSlice
