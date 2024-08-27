@@ -16,3 +16,5 @@ Route::get('employees', [EmployeeController::class, 'index']);
 Route::post('employees', [EmployeeController::class, 'store']);
 Route::put('employees/{employee}', [EmployeeController::class, 'update']);
 Route::delete('employees/{employee}', [EmployeeController::class, 'destroy']);
+Route::get('department', [EmployeeController::class, 'department']);
+Route::get('achievement', [EmployeeController::class, 'achievement']);

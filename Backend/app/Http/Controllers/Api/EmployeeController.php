@@ -13,8 +13,8 @@ class EmployeeController extends Controller
     // List Employees
     public function index()
     {
-        $employees = Employee::with(['department', 'achievements'])->get();
-        return response()->json($employees);
+        $employees = Employee::with(['department', 'achievements'])->paginate(10);
+        return response()->json(['status'=>200, 'data'=>$employees]);
     }
 
     // Create Employee
@@ -55,7 +55,6 @@ class EmployeeController extends Controller
         if ($request->has('achievements')) {
             $employee->achievements()->sync($this->formatAchievements($request->achievements));
         }
-
         return response()->json($employee->load(['department', 'achievements']));
     }
 
@@ -64,6 +63,18 @@ class EmployeeController extends Controller
     {
         $employee->delete();
         return response()->json(['message' => 'Employee deleted successfully']);
+    }
+
+    public function department()
+    {
+        $deartment = Department::get();
+        return response()->json(['status'=>200, 'data'=>$deartment]);
+    }
+
+    public function achievement()
+    {
+        $Achievement = Achievement::get();
+        return response()->json(['status'=>200, 'data'=>$Achievement]);
     }
 
     private function formatAchievements($achievements)
