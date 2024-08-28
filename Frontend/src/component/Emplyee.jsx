@@ -1,61 +1,65 @@
 import React, { useState } from 'react';
 import { Table } from 'antd';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Button, Form, Modal, message, Input, Select } from 'antd';
-import { useCreateEmplyeeMutation, useGetAcivmentQuery, useGetDepartmentQuery, useGetEmplyeeQuery } from '../../redux/serivce/productlslice';
+import { Button, Form, Modal, message, Input, Select, Pagination  } from 'antd';
+import { useCreateEmplyeeMutation, useDeleteEmplyeeMutation, useGetAcivmentQuery, useGetDepartmentQuery, useGetEmplyeeQuery, useUpdateEmplyeeMutation } from '../../redux/serivce/productlslice';
 import { CiCircleMinus } from 'react-icons/ci';
-const { Option } = Select;
+import Swal from 'sweetalert2'
 
-const columns = [
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        render: (text) => <a>{text}</a>,
-    },
-    {
-        title: 'Email',
-        dataIndex: 'email',
-    },
-    {
-        title: 'Phone',
-        dataIndex: 'phone',
-    },
-    {
-        title: 'Address',
-        dataIndex: 'address',
-    },
-    {
-        title: 'Department',
-        dataIndex: 'department_id',
-    },
-    {
-        title: 'Achievement',
-        dataIndex: 'achievement',
-        render: (text) => text || 'N/A',
-    },
-    {
-        title: 'Action',
-        dataIndex: 'action',
-        render: (_, record) => (
-            <div>
-                <button className='btn btn-success m-2'>Edit</button>
-                <button className='btn btn-danger'>Delete</button>
-            </div>
-        ),
-    },
-];
+const { Option } = Select;
 
 const Employee = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [form] = Form.useForm(); // Define the form instance
-    const { data: employees } = useGetEmplyeeQuery();
-    const {data: department} = useGetDepartmentQuery();
-    const {dat: achievement} = useGetAcivmentQuery();
-    console.log(employees)
-    const { data: createEmployee } = useCreateEmplyeeMutation();
-    // Define the mutation hook
+    const [editingEmployee, setEditingEmployee] = useState(null);
+    const [form] = Form.useForm();
+    const [page, setPage]= useState(1);
 
-    // Mapping API data to match Ant Design's expected format
+    const { data: employees } = useGetEmplyeeQuery({ page });
+    const { data: department } = useGetDepartmentQuery();
+    const { data: achievement } = useGetAcivmentQuery();
+    const [deleteEmployee] = useDeleteEmplyeeMutation();
+    const [createEmployee] = useCreateEmplyeeMutation(); 
+    const [updateEmployee] = useUpdateEmplyeeMutation();
+
+    const columns = [
+        {
+            title: 'Name',
+            dataIndex: 'name',
+            render: (text) => <a>{text}</a>,
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+        },
+        {
+            title: 'Phone',
+            dataIndex: 'phone',
+        },
+        {
+            title: 'Address',
+            dataIndex: 'address',
+        },
+        {
+            title: 'Department',
+            dataIndex: 'department_id',
+        },
+        {
+            title: 'Achievement',
+            dataIndex: 'achievement',
+            render: (text) => text || 'N/A',
+        },
+        {
+            title: 'Action',
+            dataIndex: 'action',
+            render: (_, record) => (
+                <div>
+                    <button onClick={() => openEditModal(record)} className='btn btn-success m-2'>Edit</button>
+                    <button onClick={() => openDeleteModal(record)} className='btn btn-danger'>Delete</button>
+                </div>
+            ),
+        },
+    ];
+
     const dataSource = employees?.data?.data?.map((employee) => ({
         key: employee?.id,
         name: employee?.name,
@@ -66,17 +70,75 @@ const Employee = () => {
         achievement: employee.achievements?.[0]?.name || 'N/A',
     }));
 
-    const openAddModal = () => setIsModalOpen(true);
+    const openAddModal = () => {
+        setEditingEmployee(null);
+        setIsModalOpen(true);
+    };
+
     const closeAddModal = () => setIsModalOpen(false);
+
+    const openEditModal = (employee) => {
+        setEditingEmployee(employee);
+        form.setFieldsValue({
+            ...employee,
+            department_id: employee.department?.id,
+            achievements: employee.achievements?.map((ach) => ({
+                id: ach.id,
+                date: ach.date,
+            })),
+        });
+        setIsModalOpen(true);
+    };
+
+    const openDeleteModal = (employee) => {
+        Modal.confirm({
+            title: 'Are you sure you want to delete this employee?',
+            okText: 'Yes',
+            okType: 'danger',
+            onOk: async () => {
+                try {
+                    await deleteEmployee(employee.key).unwrap();
+                    message.success('Employee deleted successfully!');
+                } catch (error) {
+                    message.error('Failed to delete employee. Please try again.');
+                }
+            },
+        });
+    };
 
     const handleSubmit = async (values) => {
         try {
-            await createEmployee(values).unwrap(); // Unwrap the result to handle errors
-            message.success('Employee added successfully!');
+            if (editingEmployee) {
+                // Update employee
+                await updateEmployee({ id: editingEmployee.key, ...values }).unwrap();
+               // message.success('Employee updated successfully!');
+                Swal.fire({
+                    title: 'Employee Added!',
+                    text: 'Employee updated successfully!.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // Create new employee
+                await createEmployee(values).unwrap();
+               // message.success('Employee added successfully!');
+                Swal.fire({
+                    title: 'Employee Added!',
+                    text: 'The employee has been added successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            }
             closeAddModal();
-            form.resetFields(); // Reset form fields
+            form.resetFields();
         } catch (error) {
-            message.error('Failed to add employee. Please try again.');
+           // message.error('Failed to save employee. Please try again.');
+           Swal.fire({
+            
+            text: 'Failed to save employee. Please try again.',
+            
+            confirmButtonText: 'OK'
+        });
         }
     };
 
@@ -88,7 +150,7 @@ const Employee = () => {
                         <Button type="primary" onClick={openAddModal} className="mb-3">
                             Add Employee
                         </Button>
-                        <Table columns={columns} dataSource={dataSource} />
+                        <Table columns={columns} dataSource={dataSource}  pagination={{ pageSize: 10 }}/>
                     </Col>
                 </Row>
             </Container>
@@ -128,9 +190,11 @@ const Employee = () => {
                                 rules={[{ required: true, message: 'Please select a department!' }]}
                             >
                                 <Select style={{ width: '100%' }}>
-                                    <Option value="1">HR</Option>
-                                    <Option value="2">Engineering</Option>
-                                    <Option value="3">Sales</Option>
+                                    {department?.data?.map((item) => (
+                                        <Option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
                             <Form.Item
@@ -158,14 +222,21 @@ const Employee = () => {
                                                             <Form.Item
                                                                 {...field}
                                                                 name={[field.name, 'id']}
-                                                                rules={[{ required: true, message: 'Please input achievement ID!' }]}
+                                                                rules={[{ required: true, message: 'Please select an achievement!' }]}
                                                                 noStyle
                                                             >
-                                                                <Input
-                                                                    placeholder="Achievement ID"
+                                                                <Select
+                                                                    placeholder="Select Achievement"
                                                                     style={{ width: '30%' }}
-                                                                />
+                                                                >
+                                                                    {achievement?.data?.map((ach) => (
+                                                                        <Option key={ach.id} value={ach.id}>
+                                                                            {ach.name}
+                                                                        </Option>
+                                                                    ))}
+                                                                </Select>
                                                             </Form.Item>
+
                                                             <Form.Item
                                                                 {...field}
                                                                 name={[field.name, 'date']}
@@ -173,10 +244,12 @@ const Employee = () => {
                                                                 noStyle
                                                             >
                                                                 <Input
+                                                                    type="date"
                                                                     placeholder="Achievement Date"
                                                                     style={{ width: '65%' }}
                                                                 />
                                                             </Form.Item>
+
                                                             {fields.length > 1 && (
                                                                 <CiCircleMinus
                                                                     size={24}

@@ -3,30 +3,57 @@ import { api } from '../api/baseApi'
 export const emplyeSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     getEmplyee: builder.query({
-      query: (token) => `employees`,
+      query: ({token,page,limit}) => `employees?page=${page}&limit=${limit}`,
       providesTags : ["employees"]
     }),
+    
    
     getDepartment: builder.query({
-      query: (token) => `employees`,
-      providesTags : ["employees"]
+      query: (token) => `department`,
+      providesTags : ["department"]
     }),
 
     getAcivment: builder.query({
-      query: (token) => `employees`,
-      providesTags : ["employees"]
+      query: (token) => `achievement`,
+      providesTags : ["achievement"]
     }),
 
-    // getSingleBlog: builder.query({
-    //   query: (id) => `single/blog/${id}`,
-    //   providesTags : ["single/blog"]
-    // }),
+ 
 
+    deleteEmplyee: builder.mutation({
+      query: id => ({
+        url: `employees/${id}`,
+        method: 'DELETE',  
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }),
+      invalidatesTags: ['employees']
+    }),
     
     createEmplyee: builder.mutation({
       query: data => ({
         url: 'employees',
         method: 'POST',
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: data
+      }),
+      invalidatesTags: ['employees']
+    }),
+
+    updateEmplyee: builder.mutation({
+      query: data => ({
+      
+        url: `employees/${data.id}`,
+        method: 'PUT',
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
         body: data
       }),
       invalidatesTags: ['employees']
@@ -36,5 +63,5 @@ export const emplyeSlice = api.injectEndpoints({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetEmplyeeQuery, useCreateEmplyeeMutation , useGetAcivmentQuery, useGetDepartmentQuery
+export const { useGetEmplyeeQuery, useCreateEmplyeeMutation , useGetAcivmentQuery, useGetDepartmentQuery, useDeleteEmplyeeMutation, useUpdateEmplyeeMutation
 } = emplyeSlice
