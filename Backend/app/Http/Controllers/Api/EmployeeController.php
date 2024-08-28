@@ -13,7 +13,7 @@ class EmployeeController extends Controller
     // List Employees
     public function index()
     {
-        $employees = Employee::with(['department', 'achievements'])->paginate(10);
+        $employees = Employee::orderBy('id','desc')->with(['department', 'achievements'])->paginate(10);
         return response()->json(['status'=>200, 'data'=>$employees]);
     }
 

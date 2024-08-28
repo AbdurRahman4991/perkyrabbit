@@ -22,11 +22,14 @@ class EmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_id'=>['required'],
-            'name'=>['required'],
-            'email'=>['required'],
-            'phone'=>['required'],
-            'address'=>['required'],
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email',
+            'phone' => 'required|string|max:15',
+            'address' => 'required|string',
+            'department_id' => 'required|exists:departments,id',
+            'achievements' => 'array',
+            'achievements.*.id' => 'exists:achievements,id',
+            'achievements.*.date' => 'required|date',
         ];
     }
 }
